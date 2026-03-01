@@ -1,0 +1,21 @@
+#!/bin/sh
+# Pre-push hook: runs lint and tests before allowing push.
+# Enable with: git config core.hooksPath .githooks
+
+echo "Running pre-push checks..."
+
+echo "==> Linting..."
+make lint
+if [ $? -ne 0 ]; then
+    echo "Lint failed. Push aborted."
+    exit 1
+fi
+
+echo "==> Testing..."
+make test
+if [ $? -ne 0 ]; then
+    echo "Tests failed. Push aborted."
+    exit 1
+fi
+
+echo "All checks passed."

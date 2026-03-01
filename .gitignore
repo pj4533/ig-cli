@@ -1,0 +1,22 @@
+# Binary
+ig-cli
+
+# Test coverage
+cover.out
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Go
+vendor/
+
+# Config (contains user credentials path)
+# The actual config is at ~/.ig-cli/ not in the repo

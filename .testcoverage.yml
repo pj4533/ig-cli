@@ -1,0 +1,9 @@
+profile: cover.out
+local-prefix: "github.com/pj4533/ig-cli"
+threshold:
+  file: 70
+  package: 75
+  total: 80
+exclude:
+  paths:
+    - main\.go

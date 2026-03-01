@@ -1,0 +1,19 @@
+linters:
+  enable:
+    - govet
+    - staticcheck
+    - errcheck
+    - gosimple
+    - unused
+    - gocritic
+    - gofmt
+
+linters-settings:
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - style
+
+issues:
+  exclude-dirs:
+    - vendor

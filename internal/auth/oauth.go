@@ -81,7 +81,7 @@ func (o *OAuthFlow) Run() (*OAuthResult, error) {
 
 	// Open browser for authorization
 	authURL := fmt.Sprintf(
-		"https://www.instagram.com/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code&scope=instagram_basic,instagram_manage_insights,pages_show_list,pages_read_engagement",
+		"https://www.instagram.com/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code&scope=instagram_business_basic,instagram_business_manage_insights",
 		o.AppID, OAuthRedirectURI,
 	)
 

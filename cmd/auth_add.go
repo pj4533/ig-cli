@@ -43,7 +43,7 @@ func runAuthAdd(cmd *cobra.Command, args []string) error {
 		Keychain:  keychain,
 	}
 
-	result, err := flow.Run()
+	result, err := oauthFlowRunner(flow)
 	if err != nil {
 		return fmt.Errorf("OAuth flow failed: %w", err)
 	}

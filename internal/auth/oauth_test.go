@@ -78,7 +78,7 @@ func TestOAuthFlow_Run_Success(t *testing.T) {
 	if err != nil {
 		t.Fatalf("callback request error: %v", err)
 	}
-	resp.Body.Close()
+	_ = resp.Body.Close()
 
 	// Wait for result
 	select {
@@ -128,7 +128,7 @@ func TestOAuthFlow_Run_NoCode(t *testing.T) {
 	if err != nil {
 		t.Fatalf("callback request error: %v", err)
 	}
-	resp.Body.Close()
+	_ = resp.Body.Close()
 
 	select {
 	case err := <-errChan:
@@ -169,7 +169,7 @@ func TestOAuthFlow_Run_ExchangeCodeFails(t *testing.T) {
 	if err != nil {
 		t.Fatalf("callback request error: %v", err)
 	}
-	resp.Body.Close()
+	_ = resp.Body.Close()
 
 	select {
 	case err := <-errChan:
@@ -213,7 +213,7 @@ func TestOAuthFlow_Run_LongLivedTokenFails(t *testing.T) {
 	if err != nil {
 		t.Fatalf("callback request error: %v", err)
 	}
-	resp.Body.Close()
+	_ = resp.Body.Close()
 
 	select {
 	case err := <-errChan:
@@ -260,7 +260,7 @@ func TestOAuthFlow_Run_GetProfileFails(t *testing.T) {
 	if err != nil {
 		t.Fatalf("callback request error: %v", err)
 	}
-	resp.Body.Close()
+	_ = resp.Body.Close()
 
 	select {
 	case err := <-errChan:
@@ -298,7 +298,7 @@ func TestOAuthFlow_Run_NoCodeNoError(t *testing.T) {
 	if err != nil {
 		t.Fatalf("callback request error: %v", err)
 	}
-	resp.Body.Close()
+	_ = resp.Body.Close()
 
 	select {
 	case err := <-errChan:

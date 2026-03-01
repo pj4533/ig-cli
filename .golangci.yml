@@ -1,19 +1,22 @@
+version: "2"
+
 linters:
+  default: none
   enable:
     - govet
     - staticcheck
     - errcheck
-    - gosimple
     - unused
     - gocritic
+  settings:
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - style
+  exclusions:
+    paths:
+      - vendor
+
+formatters:
+  enable:
     - gofmt
-
-linters-settings:
-  gocritic:
-    enabled-tags:
-      - diagnostic
-      - style
-
-issues:
-  exclude-dirs:
-    - vendor

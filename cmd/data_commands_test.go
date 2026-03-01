@@ -22,8 +22,7 @@ func setupTestEnv(t *testing.T, mock *api.MockClient) func() {
 
 	// Create temp home dir for config
 	dir := t.TempDir()
-	origHome := os.Getenv("HOME")
-	os.Setenv("HOME", dir)
+	t.Setenv("HOME", dir)
 
 	// Reset viper
 	viper.Reset()
@@ -66,7 +65,6 @@ func setupTestEnv(t *testing.T, mock *api.MockClient) func() {
 	return func() {
 		clientFactory = origClientFactory
 		keychainFactory = origKeychainFactory
-		os.Setenv("HOME", origHome)
 		viper.Reset()
 	}
 }
@@ -79,7 +77,7 @@ func captureStdout(t *testing.T, fn func()) string {
 
 	fn()
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = old
 
 	var buf bytes.Buffer
@@ -411,9 +409,7 @@ func TestRunDiscover_Error(t *testing.T) {
 
 func TestGetClient_NoConfig(t *testing.T) {
 	dir := t.TempDir()
-	origHome := os.Getenv("HOME")
-	os.Setenv("HOME", dir)
-	defer os.Setenv("HOME", origHome)
+	t.Setenv("HOME", dir)
 
 	viper.Reset()
 	defer viper.Reset()

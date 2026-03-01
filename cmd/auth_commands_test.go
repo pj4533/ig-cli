@@ -16,9 +16,7 @@ import (
 
 func TestRunAuthList_NoAccounts(t *testing.T) {
 	dir := t.TempDir()
-	origHome := os.Getenv("HOME")
-	os.Setenv("HOME", dir)
-	defer os.Setenv("HOME", origHome)
+	t.Setenv("HOME", dir)
 
 	viper.Reset()
 	defer viper.Reset()
@@ -43,9 +41,7 @@ func TestRunAuthList_NoAccounts(t *testing.T) {
 
 func TestRunAuthList_WithAccounts(t *testing.T) {
 	dir := t.TempDir()
-	origHome := os.Getenv("HOME")
-	os.Setenv("HOME", dir)
-	defer os.Setenv("HOME", origHome)
+	t.Setenv("HOME", dir)
 
 	viper.Reset()
 	defer viper.Reset()
@@ -97,9 +93,7 @@ func TestRunAuthList_WithAccounts(t *testing.T) {
 
 func TestRunAuthRemove_Success(t *testing.T) {
 	dir := t.TempDir()
-	origHome := os.Getenv("HOME")
-	os.Setenv("HOME", dir)
-	defer os.Setenv("HOME", origHome)
+	t.Setenv("HOME", dir)
 
 	viper.Reset()
 	defer viper.Reset()
@@ -137,9 +131,7 @@ func TestRunAuthRemove_Success(t *testing.T) {
 
 func TestRunAuthRemove_NotFound(t *testing.T) {
 	dir := t.TempDir()
-	origHome := os.Getenv("HOME")
-	os.Setenv("HOME", dir)
-	defer os.Setenv("HOME", origHome)
+	t.Setenv("HOME", dir)
 
 	viper.Reset()
 	defer viper.Reset()
@@ -160,9 +152,7 @@ func TestRunAuthRemove_NotFound(t *testing.T) {
 
 func TestRunAuthAdd_NoAppID(t *testing.T) {
 	dir := t.TempDir()
-	origHome := os.Getenv("HOME")
-	os.Setenv("HOME", dir)
-	defer os.Setenv("HOME", origHome)
+	t.Setenv("HOME", dir)
 
 	viper.Reset()
 	defer viper.Reset()
@@ -181,9 +171,7 @@ func TestRunAuthAdd_NoAppID(t *testing.T) {
 
 func TestRunAuthAdd_NoAppSecret(t *testing.T) {
 	dir := t.TempDir()
-	origHome := os.Getenv("HOME")
-	os.Setenv("HOME", dir)
-	defer os.Setenv("HOME", origHome)
+	t.Setenv("HOME", dir)
 
 	viper.Reset()
 	defer viper.Reset()
@@ -206,11 +194,112 @@ func TestRunAuthAdd_NoAppSecret(t *testing.T) {
 	}
 }
 
+func TestRunAuthAdd_Success(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("HOME", dir)
+
+	viper.Reset()
+	defer viper.Reset()
+
+	cfg := &config.Config{AppID: "test-app-id"}
+	if err := config.Save(cfg); err != nil {
+		t.Fatalf("save config: %v", err)
+	}
+	viper.Reset()
+
+	mockKeychain := auth.NewMockKeychain()
+	_ = mockKeychain.Set("app_secret", "test-secret")
+
+	mockClient := &api.MockClient{}
+
+	origKeychainFactory := keychainFactory
+	origClientFactory := clientFactory
+	origFlowRunner := oauthFlowRunner
+	keychainFactory = func() auth.KeychainStore { return mockKeychain }
+	clientFactory = func(token string) api.Client { return mockClient }
+	oauthFlowRunner = func(flow *auth.OAuthFlow) (*auth.OAuthResult, error) {
+		return &auth.OAuthResult{
+			Username:  "testuser",
+			UserID:    "12345",
+			Token:     "long-token",
+			ExpiresIn: 5184000,
+		}, nil
+	}
+	defer func() {
+		keychainFactory = origKeychainFactory
+		clientFactory = origClientFactory
+		oauthFlowRunner = origFlowRunner
+	}()
+
+	output := captureStdout(t, func() {
+		err := runAuthAdd(nil, nil)
+		if err != nil {
+			t.Fatalf("runAuthAdd error: %v", err)
+		}
+	})
+
+	if output == "" {
+		t.Error("expected output")
+	}
+
+	// Verify token was stored
+	token, err := mockKeychain.Get(auth.TokenKey("testuser"))
+	if err != nil {
+		t.Fatalf("get token error: %v", err)
+	}
+	if token != "long-token" {
+		t.Errorf("token = %q, want %q", token, "long-token")
+	}
+
+	// Verify user ID was stored
+	userID, err := mockKeychain.Get(auth.UserIDKey("testuser"))
+	if err != nil {
+		t.Fatalf("get user ID error: %v", err)
+	}
+	if userID != "12345" {
+		t.Errorf("userID = %q, want %q", userID, "12345")
+	}
+}
+
+func TestRunAuthAdd_OAuthFlowFails(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("HOME", dir)
+
+	viper.Reset()
+	defer viper.Reset()
+
+	cfg := &config.Config{AppID: "test-app-id"}
+	if err := config.Save(cfg); err != nil {
+		t.Fatalf("save config: %v", err)
+	}
+	viper.Reset()
+
+	mockKeychain := auth.NewMockKeychain()
+	_ = mockKeychain.Set("app_secret", "test-secret")
+
+	origKeychainFactory := keychainFactory
+	origClientFactory := clientFactory
+	origFlowRunner := oauthFlowRunner
+	keychainFactory = func() auth.KeychainStore { return mockKeychain }
+	clientFactory = func(token string) api.Client { return &api.MockClient{} }
+	oauthFlowRunner = func(flow *auth.OAuthFlow) (*auth.OAuthResult, error) {
+		return nil, fmt.Errorf("oauth flow failed")
+	}
+	defer func() {
+		keychainFactory = origKeychainFactory
+		clientFactory = origClientFactory
+		oauthFlowRunner = origFlowRunner
+	}()
+
+	err := runAuthAdd(nil, nil)
+	if err == nil {
+		t.Error("expected error when OAuth flow fails")
+	}
+}
+
 func TestRunAuthSetup_Success(t *testing.T) {
 	dir := t.TempDir()
-	origHome := os.Getenv("HOME")
-	os.Setenv("HOME", dir)
-	defer os.Setenv("HOME", origHome)
+	t.Setenv("HOME", dir)
 
 	viper.Reset()
 	defer viper.Reset()
@@ -228,9 +317,9 @@ func TestRunAuthSetup_Success(t *testing.T) {
 	defer func() { os.Stdin = oldStdin }()
 
 	go func() {
-		fmt.Fprintln(w, "test-app-id")
-		fmt.Fprintln(w, "test-app-secret")
-		w.Close()
+		_, _ = fmt.Fprintln(w, "test-app-id")
+		_, _ = fmt.Fprintln(w, "test-app-secret")
+		_ = w.Close()
 	}()
 
 	output := captureStdout(t, func() {
@@ -256,9 +345,7 @@ func TestRunAuthSetup_Success(t *testing.T) {
 
 func TestRunAuthSetup_EmptyAppID(t *testing.T) {
 	dir := t.TempDir()
-	origHome := os.Getenv("HOME")
-	os.Setenv("HOME", dir)
-	defer os.Setenv("HOME", origHome)
+	t.Setenv("HOME", dir)
 
 	viper.Reset()
 	defer viper.Reset()
@@ -270,8 +357,8 @@ func TestRunAuthSetup_EmptyAppID(t *testing.T) {
 	defer func() { os.Stdin = oldStdin }()
 
 	go func() {
-		fmt.Fprintln(w, "")
-		w.Close()
+		_, _ = fmt.Fprintln(w, "")
+		_ = w.Close()
 	}()
 
 	err := runAuthSetup(nil, nil)
@@ -282,9 +369,7 @@ func TestRunAuthSetup_EmptyAppID(t *testing.T) {
 
 func TestRunAuthSetup_EmptySecret(t *testing.T) {
 	dir := t.TempDir()
-	origHome := os.Getenv("HOME")
-	os.Setenv("HOME", dir)
-	defer os.Setenv("HOME", origHome)
+	t.Setenv("HOME", dir)
 
 	viper.Reset()
 	defer viper.Reset()
@@ -296,9 +381,9 @@ func TestRunAuthSetup_EmptySecret(t *testing.T) {
 	defer func() { os.Stdin = oldStdin }()
 
 	go func() {
-		fmt.Fprintln(w, "test-app-id")
-		fmt.Fprintln(w, "")
-		w.Close()
+		_, _ = fmt.Fprintln(w, "test-app-id")
+		_, _ = fmt.Fprintln(w, "")
+		_ = w.Close()
 	}()
 
 	err := runAuthSetup(nil, nil)

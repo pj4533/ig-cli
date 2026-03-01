@@ -17,12 +17,18 @@ var clientFactory func(token string) api.Client
 // keychainFactory allows overriding keychain for testing.
 var keychainFactory func() auth.KeychainStore
 
+// oauthFlowRunner allows overriding the OAuth flow execution for testing.
+var oauthFlowRunner func(flow *auth.OAuthFlow) (*auth.OAuthResult, error)
+
 func init() {
 	clientFactory = func(token string) api.Client {
 		return api.NewGraphClient(token)
 	}
 	keychainFactory = func() auth.KeychainStore {
 		return &auth.OSKeychain{}
+	}
+	oauthFlowRunner = func(flow *auth.OAuthFlow) (*auth.OAuthResult, error) {
+		return flow.Run()
 	}
 }
 

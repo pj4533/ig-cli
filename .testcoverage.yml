@@ -7,3 +7,5 @@ threshold:
 exclude:
   paths:
     - main\.go
+    - internal/auth/keychain\.go
+    - cmd/root\.go

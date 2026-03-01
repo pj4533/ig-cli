@@ -29,7 +29,7 @@ func runAuthSetup(cmd *cobra.Command, args []string) error {
 	appID = strings.TrimSpace(appID)
 
 	if appID == "" {
-		return fmt.Errorf("App ID cannot be empty")
+		return fmt.Errorf("app ID cannot be empty")
 	}
 
 	fmt.Print("Enter your Meta App Secret: ")
@@ -37,7 +37,7 @@ func runAuthSetup(cmd *cobra.Command, args []string) error {
 	appSecret = strings.TrimSpace(appSecret)
 
 	if appSecret == "" {
-		return fmt.Errorf("App Secret cannot be empty")
+		return fmt.Errorf("app secret cannot be empty")
 	}
 
 	// Store App ID in config (not sensitive)

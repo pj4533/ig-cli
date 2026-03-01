@@ -35,3 +35,23 @@ func TestRootCmdFlags(t *testing.T) {
 		t.Error("missing --verbose flag")
 	}
 }
+
+func TestPersistentPreRun(t *testing.T) {
+	// Test with verbose off (default)
+	verboseFlag = false
+	rootCmd.PersistentPreRun(rootCmd, nil)
+
+	// Test with verbose on
+	verboseFlag = true
+	rootCmd.PersistentPreRun(rootCmd, nil)
+
+	// Reset
+	verboseFlag = false
+}
+
+func TestExecuteFunc(t *testing.T) {
+	// Test the Execute() wrapper for the success path (no args = prints help).
+	// We can't test the error path since it calls os.Exit(1).
+	rootCmd.SetArgs([]string{})
+	Execute()
+}

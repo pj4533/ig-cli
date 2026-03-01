@@ -49,12 +49,12 @@ func (o *OAuthFlow) Run() (*OAuthResult, error) {
 			if errMsg == "" {
 				errMsg = "no authorization code received"
 			}
-			fmt.Fprintf(w, "<html><body><h2>Authentication Failed</h2><p>%s</p><p>You can close this window.</p></body></html>", errMsg)
+			_, _ = fmt.Fprintf(w, "<html><body><h2>Authentication Failed</h2><p>%s</p><p>You can close this window.</p></body></html>", errMsg)
 			errChan <- fmt.Errorf("OAuth callback error: %s", errMsg)
 			return
 		}
 
-		fmt.Fprint(w, "<html><body><h2>Authentication Successful!</h2><p>You can close this window and return to the terminal.</p></body></html>")
+		_, _ = fmt.Fprint(w, "<html><body><h2>Authentication Successful!</h2><p>You can close this window and return to the terminal.</p></body></html>")
 		codeChan <- code
 	})
 

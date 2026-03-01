@@ -83,7 +83,7 @@ func (c *GraphClient) doRequest(method, rawURL string) ([]byte, *RateLimitInfo, 
 	if err != nil {
 		return nil, nil, fmt.Errorf("executing request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

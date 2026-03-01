@@ -18,7 +18,7 @@ func TestOutputJSON(t *testing.T) {
 		t.Fatalf("outputJSON error: %v", err)
 	}
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = old
 
 	var buf bytes.Buffer
@@ -42,7 +42,7 @@ func TestOutputError(t *testing.T) {
 
 	outputError(os.ErrNotExist)
 
-	w.Close()
+	_ = w.Close()
 	os.Stderr = old
 
 	var buf bytes.Buffer
